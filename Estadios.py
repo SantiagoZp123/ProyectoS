@@ -5,7 +5,7 @@ class Estadios():
         self.estadio = estadio
 
     def mostrar_estadio(self):
-        return self.nombre, self.ubicación
+        return self.nombre, self.ubicación, self.estadio
     
     def __str__(self):
-        return (f"Nombre: {self.nombre}, Ubicación: {self.ubicación}")
+        return (f"Nombre: {self.nombre}, Ubicación: {self.ubicación}, Estadio: {self.estadio}")
