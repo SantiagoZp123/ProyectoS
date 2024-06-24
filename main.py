@@ -5,49 +5,49 @@ from Partidos import Partidos
 import requests
 import json
 
-def crearEquipo(nombre_pais, codigo_fifa, grupo, equipos_objeto, equipos):
-    nuevo_equipo = Equipos(nombre_pais, codigo_fifa, grupo)
+def crearEquipo(nombre, codigoFifa, grupo, equipos_objeto, equipos):
+    nuevo_equipo = Equipos(nombre, codigoFifa, grupo)
     equipos_objeto.append(nuevo_equipo)
-    equipos.append(nuevo_equipo.mostrar_equipo())
+    equipos.append(nuevo_equipo)
 
+def emparejar_equipos_partidos(equipos):
+    equipos1_2 = []
+    for i in equipos:
+        if getattr(i, 'partido') == 'partido':
+            equipos1_2.append(i.show_nombre_num())
+    return equipos1_2
 
-def crearEstadio(nombre, ubicacion, estadios_objeto, estadios):
-    nuevo_estadio = Estadios(nombre, ubicacion)
-    estadios_objeto.append(nuevo_estadio)
-    estadios.append(nuevo_estadio.mostrar_estadio())
-
-def crearPartido(equipo_local, equipo_visitante, fecha_hora, estadio, partidos_objeto, partidos):
-    nuevo_partido = Partidos(equipo_local, equipo_visitante, fecha_hora, estadio)
+def crearPartido(equipo_local, equipo_visitante, fecha, estadio, equipos, partidos_objeto, partidos):
+    equipos1_2 = emparejar_equipos_partidos(equipos)
+    nuevo_partido = Partidos(equipo_local, equipo_visitante, fecha, estadio, fecha)
     partidos_objeto.append(nuevo_partido)
     partidos.append(nuevo_partido.mostrar_partido())
 
-def emparejar_partidos(equipos, estadios, partidos):
-    equipos_dict = {equipo["id"]: Equipos(equipo["id"], equipo["code"], equipo["name"], equipo["group"]) for equipo in equipos}
-    estadios_dict = {estadio["id"]: Estadios(estadio["id"], estadio["name"], estadio["city"], estadio["capacity"], estadio["restaurants"]) for estadio in estadios}
-    
-    partidos_objeto = []
-    partidos_lista = []
+def mostrarPartidos(partidos):
+    paises = []
+    for partido in partidos:
+        paises.append(partido.equipo_local)  # Corregido para usar equipo_local
+    paises = list(set(paises))
+    for i, pais in enumerate(paises):
+        print(f"{i+1}. {pais}")
+    option = input("Seleccione el pais que desea ver: ")
 
     for partido in partidos:
-        equipo_local = equipos_dict.get(partido["home"]["id"])
-        equipo_visitante = equipos_dict.get(partido["away"]["id"])
-        estadio = estadios_dict.get(partido["id"])
-        
-        if equipo_local and equipo_visitante and estadio:
-            nuevo_partido = Partidos(partido["id"], partido["number"], equipo_local, equipo_visitante, partido["date"], partido["group"], estadio)
-            partidos_objeto.append(nuevo_partido)
-            partidos_lista.append(nuevo_partido.mostrar_partido())
-    
-    return partidos_objeto, partidos_lista
+        if partido.equipo_local == paises[int(option)-1]:  # Corregido para usar equipo_local
+            print(partido.mostrar_partido())
+
+def crearEstadio(nombre, ubicacion, estadio, estadios_objeto, estadios):
+    nuevo_estadio = Estadios(nombre, ubicacion, estadio)
+    estadios_objeto.append(nuevo_estadio)
 
 def main():
-
-    equipos_objeto= []
-    equipos =[]
+    equipos_objeto = []
+    equipos = []
     estadios_objeto = []
     estadios = []
     partidos_objeto = []
     partidos = []
+
     requests_equipos = requests.get('https://raw.githubusercontent.com/Algoritmos-y-Programacion/api-proyecto/main/teams.json')
     contenido_equipos = requests_equipos.content
     info_equipos = open('equipos.json', 'wb')
@@ -66,16 +66,35 @@ def main():
     info_partidos.write(contenido_partidos)
     info_partidos.close()
 
+    archivo_partidos = open('partidos.json')
+    datos_partidos = json.load(archivo_partidos)
+    for i in range(len(datos_partidos)):
+        equipo_local = datos_partidos[i]["home"]
+        equipo_visitante = datos_partidos[i]["away"]
+        fecha = datos_partidos[i]["date"]
+        estadio = datos_partidos[i]["stadium_id"]
+        crearPartido(equipo_local, equipo_visitante, fecha, estadio, equipos, partidos_objeto, partidos)
+    archivo_partidos.close()
+    
     archivo_equipos = open('equipos.json')
     datos_equipos = json.load(archivo_equipos)
+    for i in range(len(datos_equipos)):
+        nombre = datos_equipos[i]["name"]
+        codigoFifa = datos_equipos[i]["code"]
+        grupo = datos_equipos[i]["group"]
+        crearEquipo(nombre, codigoFifa, grupo, equipos_objeto, equipos)
+    archivo_equipos.close()
 
-    for i in range (0,len(datos_equipos)):
-       nombre = datos_equipos[i]["name"]
-       codigoFifa = datos_equipos[i]["code"]
-       grupo = datos_equipos[i]["group"]
-       crearEquipo(nombre, codigoFifa, grupo, equipos_objeto, equipos)
-       info_equipos.close()
+    archivo_estadios = open('estadios.json')
+    datos_estadios = json.load(archivo_estadios)
+    for i in range(len(datos_estadios)):
+        nombre = datos_estadios[i]["name"]
+        ubicacion = datos_estadios[i]["city"]
+        estadio = datos_estadios[i]["id"]
+        crearEstadio(nombre, ubicacion, estadio, estadios_objeto, estadios)
+    archivo_estadios.close()
 
-    print (equipos)
+    print("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ Bienvenido a la Euro 2024 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓")
+    mostrarPartidos(partidos_objeto)
 
 main()

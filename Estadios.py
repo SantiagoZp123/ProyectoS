@@ -1,7 +1,8 @@
 class Estadios():
-    def __init__(self, nombre, ubicación, estadio):
-        self.nombre = nombre
-        self.ubicación = ubicación
+    def __init__(self, equipo_local, equipo_visitante, fecha, estadio):
+        self.equipo_local = equipo_local
+        self.equipo_visitante = equipo_visitante
+        self.fecha = fecha
         self.estadio = estadio
 
     def mostrar_estadio(self):
