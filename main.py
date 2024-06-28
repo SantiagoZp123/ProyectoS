@@ -305,9 +305,540 @@ def main():
                         elif busqueda ==4:
                             break
             elif gestion ==2:
+                print("░░░░░░░░░░░░░░░░░░░░░ Seccion de venta de entradas ░░░░░░░░░░░░░░░░░░░░░")
+
+                opcion = input("""Usted desea realizar una compra:
+[1] » Si 
+[2] » No """)
+                if opcion.isnumeric()==False or int(opcion)>2:
+                    print ("Ingrese una opción válida: ")
+                else: 
+                    opcion = int(opcion)
+                    if opcion ==1:
+                        lista_generales = []
+                        lista_vip = []
+                        for x in datos_estadios:
+                            nombre = x["name"]
+                            for x2,y in x.items():
+                                if x2 =="capacity":
+                                    general = y[0]
+                                    vip = y[1]
+
+                                    lista_generales.append(general)
+                                    lista_vip.append(vip)
+
+                        nombre = input("Ingrese su nombre: ")
+                        while not nombre.isalpha():
+                            nombre = (input("Ingrese un nombre valido: "))
+                        cedula = input("Ingrese su cedula: ")
+                        while not cedula.isnumeric():
+                            cedula = input("Ingrese una cedula validad: ")
+                        
+                        edad = input("Ingrese su edad: ")
+                        while not edad.isnumeric():
+                            edad = input ("Introduzca una edad valida:")
+                            if int(edad) > 0 and int(edad) < 100:
+                                continue
+                            else: 
+                                edad = input("Ingrese una edad válida: ")
+                        """buscarCarreras(equiposs_objeto)"""
+                        cantidad_entradas = input("Ingrese la cantidad de entradas a comprar: ")
+                        while not cantidad_entradas.isdigit():
+                            cantidad_entradas = input("Ingrese una cantidad de entradas válida: ")
+
+                        cantidad_entradas = int(cantidad_entradas)
+                        for i, x in enumerate(estadios_objeto, start=1):
+                            print(f"{i}. {x.mostrar_estadio()}")
+                        tipo_entrada = input("""Ingrese el tipo de entrada que desea adquirir: 
+[1] » General           
+[2] » Vip """)
+                        if tipo_entrada == "1":
+                            asientos_c = []
+                            precio_general = 150.00
+                            option = int(input("Ingrese el número del partido que desea comprar: ")) -1
+                            print("--------------------------------------------------------------------------------------------------------------")
+                            print(f"A continuación se muestra la lista de entradas disponible de la forma [Fila,Columna] --> {lista_generales[option]} ")
+                            print("--------------------------------------------------------------------------------------------------------------")
+                            i = lista_generales[option]
+                            print(f"                                 ╔ Mapa Carrera {option} ╗                                                   ")
+                            print(mapa)
+                            print("--------------------------------------------------------------------------------------------------------------")
+
+                            for _ in range(cantidad_entradas):    
+                                while True:
+                                    try:
+                                        fila = int(input("Seleccione la fila: ")) - 1
+                                        columna = int(input("Seleccione la columna: ")) - 1
+                                        
+                                        if fila < 0 or fila >= len(mapa) or columna < 0 or columna >= len(mapa[0]):
+                                            print("Fila o columna fuera de rango. Intente de nuevo.")
+                                            continue
+
+                                        if mapa[fila][columna]:
+                                            print("Asiento ya ocupado. Seleccione otro asiento.")
+                                        else:
+                                            mapa[fila][columna] = True
+                                            asiento = f"F{fila+1}C{columna+1}"
+                                            asientos_c.append(asiento)
+                                            break
+                                    except ValueError:
+                                        print("Entrada no válida. Por favor ingrese números válidos.")
+                                    except Exception as e:
+                                        print(f"Ocurrió un error: {e}")
+                                        
+                                print("\nAviso: Los puestos ocupados contienen True, por favor selecciona los que no están ocupados\n")
+                                print(mapa)
+
+                            codigo_ticket = codigoAleatorio(nombre)
+                            iva = 0.16
+                            monto = float(cantidad_entradas) * precio_general
+                            
+                            if esNumeroVampiro(cedula):
+                                print("Su cédula es un número ondulado, por ende obtiene un descuento en la compra de sus entradas")
+                                monto_descuento = monto * 0.50
+                                monto_d = monto - monto_descuento
+                                monto_con_iva = monto_d * iva
+                                monto_total = monto_d + monto_con_iva 
+                            else:
+                                monto_con_iva = monto * iva
+                                monto_descuento = "No"
+                                print("Su cédula no es un número ondulado, por ende no hay descuento")
+                                monto_total = monto + monto_con_iva
+
+                            print(f"""Detalles compra:
+                            Asientos: {asientos_c} 
+                            Código: {codigo_ticket}
+                            Subtotal: {monto}
+                            Descuento: {monto_descuento}
+                            Iva: {monto_con_iva}
+                            Total: {monto_total}
+                            """)
+
+                            compra = input("¿Desea proceder a comprar la entrada?\n[1] » Sí\n[2] » No\n")
+                            while not compra.isnumeric():
+                                compra = input("Entrada no válida. ¿Desea proceder a comprar la entrada?\n[1] » Sí\n[2] » No\n")
+                            
+                            compra = int(compra)
+                            if compra == 1:
+                                print("Compra exitosa")
+                                codigos.append(codigo_ticket)
+                                entrada = "general"
+                                cliente = Cliente(nombre, cedula, edad, entrada, codigo_ticket, asientos_c)
+                                clientes.append(cliente)
+                                print(cliente.mostrar_cliente())
+                            else:
+                                print("Compra cancelada") 
+
+                        elif tipo_entrada == "2":
+                            asientos_c = []
+                            entrada = "vip"
+                            precio_vip = 340.00
+                            option = int(input("Ingrese el número del partido que desea comprar: ")) -1
+                            print("--------------------------------------------------------------------------------------------------------------")
+                            print(f"A continuación se muestra la lista de entradas disponible de la forma [Fila,Columna] --> {lista_vip[option]}")
+                            print("--------------------------------------------------------------------------------------------------------------")
+                            i = lista_vip[option]
+                            mapa = crear_mapa(i)
+                            print(f"                                 ╔ Mapa Carrera {option} ╗                                                   ")
+                            print(mapa)
+                            print("--------------------------------------------------------------------------------------------------------------")
+
+                            for i in range(cantidad_entradas):
+                                while True:
+                                    try:
+                                        fila = int(input("Seleccione la fila: ")) - 1
+                                        columna = int(input("Seleccione la columna: ")) - 1
+
+                                        if fila < 0 or columna < 0 or fila >= len(mapa) or columna >= len(mapa[0]):
+                                            print("La fila o columna seleccionada no es válida. Intente nuevamente.")
+                                            continue
+
+                                        if mapa[fila][columna]:
+                                            print("El asiento seleccionado ya está ocupado. Por favor seleccione otro asiento.")
+                                            continue
+
+                                        mapa[fila][columna] = True
+                                        print("\n Aviso: Los puestos ocupados contienen True, por favor selecciona los que no están ocupados\n")
+                                        print(mapa)
+
+                                        asiento = f"F{fila+1}C{columna+1}"
+                                        asientos_c.append(asiento)
+                                        break
+
+                                    except ValueError:
+                                        print("Entrada no válida. Por favor, ingrese un número para la fila y la columna.")
+                                    except Exception as e:
+                                        print(f"Ocurrió un error: {e}")
+
+                            codigo_ticket = codigoAleatorio(nombre)
+                            iva = 0.16
+                            monto = float(cantidad_entradas) * precio_vip
+                            
+
+                            if esNumeroVampiro(cedula):
+                                print("Su cédula es un número ondulado, por ende obtiene un descuento en la compra de sus entradas")
+                                monto_descuento = monto * 0.50
+                                monto_d = monto - monto_descuento
+                                monto_con_iva = monto_d * iva
+                                monto_total_vip = monto_d + monto_con_iva
+                            else:
+                                print("Su cédula no es un número ondulado, por ende no hay descuento")
+                                monto_descuento = 0
+                                monto_con_iva = monto * iva
+                                monto_total_vip = monto + monto_con_iva
+                                montos_ticket_vip =+ monto_total_vip
+
+                            print(f"""Detalles compra:
+                            Asientos: {asientos_c} 
+                            Código: {codigo_ticket}
+                            Subtotal: {monto}
+                            Descuento: {monto_descuento}
+                            Iva: {monto_con_iva}
+                            Total: {monto_total_vip}
+                            """)
+
+                            compra = input("Desea proceder a comprar la entrada \n[1] » Si \n[2] » No")
+                            while not compra.isdigit() or int(compra) not in [1, 2]:
+                                compra = input("Desea proceder a comprar la entrada \n[1] » Si \n[2] » No")
+                            
+                            compra = int(compra)
+                            if compra == 1:
+                                print("Compra exitosa")
+                                codigos.append(codigo_ticket)
+                                cedulas_vip.append(cedula)
+                                cliente = Cliente(nombre, cedula, edad, entrada, codigo_ticket, asientos_c)
+                                clientes.append(cliente)
+                                print(cliente.mostrar_cliente())
+                            else:
+                                print("Compra cancelada")
+                        
+                            #with open("clientesvip.txt", "w") as f:
+                                #f.write(nombre,cedula,edad,entrada,codigo_ticket,asientos_c)
+            elif opcion == 3:
+                print("Gestión de asitencia a partidos")
+                aux = 0
+                aux1 = 0
+
+                while True:
+                    try:
+                        codigo = input("Ingrese el codigo numerico de su boleto: ")
+                        break
+                    except:
+                        print("Error")
+
+                for x in codigos:
+                    if codigo == x:
+                        aux += 1
+
+                for x in codigos_usados:
+                    if codigo == x:
+                        aux1 += 1
                 
-            elif opcion == 2:
-                print ("Gracias por su visita")
-                break
+                if aux1 > 0:
+                    print("Este codigo ya ha sido utilizado")
+                elif aux == 0:
+                    print("Error, boleto no encontrado")
+                else:
+                    codigos_usados.append(codigo)
+                    print("Disfrute del partido")
+            elif gestion == 4:
+                print("Gestión de restaurantes")
+                for x in datos_estadios:
+                    for x2,y in x.items():
+                        if x2 == "restaurants":
+                            inventarioind = []
+                            for x3 in y:
+                                nombre_restaurante = x3["name"]
+                                for x4,y2 in x3.items():
+                                    if x4 == "products":
+                                        for x5 in y2:
+                                            nombre_producto = x5["name"]
+                                            tipo_producto = x5["adicional"]
+                                            if tipo_producto == "alcoholic":
+                                                precio_producto = x5["price"]  
+                                                cantidad =x5["quantity"] 
+                                                stock =x5["stock"]
+                                                precio_con_iva = float(precio_producto) * 0.16
+                                                precio_total = float(precio_producto) + float(precio_con_iva)
+                                                precio_final = round(precio_total,2)
+                                                tipo = "bebida"
+                                                #print(nombre_restaurante,nombre_producto,tipo_producto,precio_producto,precio_con_iva,precio_total,precio_final)
+                                                alcoholic = Alcoholica(nombre_producto, cantidad,precio_final,stock,tipo_producto, tipo)
+                                                bebidas_alcholicas_objeto.append(alcoholic)
+                                                total_productos.append(alcoholic)
+                                                #print(alcoholic.mostrar_bebida_alcoholica())
+
+                
+                for x in datos_estadios:
+                    for x2,y in x.items():
+                        if x2 == "restaurants":
+                            inventarioind = []
+                            for x3 in y:
+                                nombre_restaurante = x3["name"]
+                                for x4,y2 in x3.items():
+                                    if x4 == "products":
+                                        for x5 in y2:
+                                            nombre_producto = x5["name"]
+                                            tipo_producto = x5["adicional"]
+                                            if tipo_producto == "non-alcoholic":
+                                                precio_producto = x5["price"]
+                                                cantidad = x5["quantity"]
+                                                stock =x5["stock"]
+                                                precio_con_iva = float(precio_producto) * 0.16
+                                                precio_total = float(precio_producto) + float(precio_con_iva) 
+                                                precio_final = round(precio_total,2)
+                                                tipo = "bebida"
+                                                #print(nombre_restaurante,nombre_producto,tipo_producto,precio_producto,precio_con_iva,precio_total,precio_final)"""
+                                                noalcoholic = NoAlcoholica(nombre_producto,cantidad,precio_final, stock,tipo_producto, tipo)
+                                                bebidas_noalcoholicas_objeto.append(noalcoholic)
+                                                total_productos.append(noalcoholic)
+
+                                                #print(noalcoholic.mostrar_bebida_noalcoholica())"""
+                for x in datos_estadios:
+                    for x2,y in x.items():
+                        if x2 == "restaurants":
+                            inventarioind = []
+                            for x3 in y:
+                                nombre_restaurante = x3["name"]
+                                for x4,y2 in x3.items():
+                                    if x4 == "products":
+                                        for x5 in y2:
+                                            nombre_producto = x5["name"]
+                                            tipo_producto = x5["adicional"]
+                                            if tipo_producto == "plate":
+                                                precio_producto = x5["price"] 
+                                                cantidad = x5["quantity"]
+                                                stock =x5["stock"]
+                                                precio_con_iva = float(precio_producto) * 0.16
+                                                precio_total = float(precio_producto) + float(precio_con_iva)
+                                                precio_final = round(precio_total,2)  
+                                                tipo = "alimento"
+                                                #print(nombre_restaurante,nombre_producto,tipo_producto,precio_producto,precio_con_iva,precio_total,precio_final)
+                                                plates = Plate(nombre_producto,cantidad,precio_final,stock, tipo_producto, tipo)
+                                                alimentos_plate_objeto.append(plates)
+                                                total_productos.append(plates)
+                                                #print(preparado.mostrar_preparacion())
+
+                for x in datos_estadios:
+                    for x2,y in x.items():
+                        if x2 == "restaurants":
+                            inventarioind = []
+                            for x3 in y:
+                                nombre_restaurante = x3["name"]
+                                for x4,y2 in x3.items():
+                                    if x4 == "products":
+                                        for x5 in y2:
+                                            nombre_producto = x5["name"]
+                                            tipo_producto = x5["adicional"]
+                                            if tipo_producto == "package":
+                                                precio_producto = x5["price"] 
+                                                cantidad = x5["quantity"]
+                                                stock =x5["stock"]  
+                                                precio_con_iva = float(precio_producto) * 0.16
+                                                precio_total = float(precio_producto) + float(precio_con_iva)
+                                                precio_final = round(precio_total,2)
+                                                tipo = "alimento"
+                                                #print(nombre_restaurante,nombre_producto,tipo_producto,precio_producto,precio_con_iva,precio_total,precio_final)
+                                                packagee = Package(nombre_producto,cantidad, precio_final, stock,tipo_producto,tipo)
+                                                alimentos_package_objeto.append(packagee)
+                                                total_productos.append(packagee)
+                                                #print(empacado.mostrar_empaque())
+
+                option = input("""Desea buscar productos por: 
+[1] » Nombre 
+[2] » Tipo
+[1] » Rango de Precio """)
+                if option.isnumeric() == False:
+                    option = input(""""Desea buscar productos por:
+[1] » Nombre 
+[2] » Tipo
+[1] » Rango de Precio""")
+                else:
+                    option = int(option)
+                    if option ==1:
+                        for x in total_productos:
+                            print(x.mostrar_producto())
+                        contador = 0
+                        while True:
+                            try:
+                                nombre = input("Ingrese el nombre del producto que desea buscar: ")
+                                break
+                            except:
+                                print("Error")
+                        
+                        for x in total_productos:
+                            if x.nombre == nombre:
+                                contador += 1
+                                print(x.mostrar_producto())
+                                print("\nProducto encontrado con exito!! \n")
+                        
+                        if contador == 0:
+                            print("No se encontro el producto")
+
+                    elif option ==2:
+                        for x in total_productos:
+                            print(x.mostrar_producto())
+                        contador = 0
+                        while True:
+                            try:
+                                tipe = input("Ingrese el tipo del producto que desea buscar: ")
+                                break
+                            except:
+                                print("Error")
+                        
+                        for x in total_productos:
+                            if x.tipo == tipe:
+                                contador += 1
+                                print(x.mostrar_producto())
+                                print("\nTipo de producto encontrado con exito!! \n")
+                    elif option ==3:
+                        # Muestra todos los productos
+                        for x in total_productos:
+                            print(x.mostrar_producto())
+
+                        contador = 0
+
+                        # Obtén el precio mínimo
+                        while True:
+                            try:
+                                price1 = float(input("Ingrese el precio mínimo: "))
+                                break
+                            except ValueError:
+                                print("Error: Por favor, ingrese un número válido para el precio mínimo.")
+
+                        # Obtén el precio máximo
+                        while True:
+                            try:
+                                price2 = float(input("Ingrese el precio máximo: "))
+                                if price2 < price1:
+                                    raise ValueError("El precio máximo no puede ser menor que el precio mínimo.")
+                                break
+                            except ValueError as e:
+                                print(f"Error: {e}")
+
+                        # Filtra y muestra los productos dentro del rango de precios
+                        for x in total_productos:
+                            try:
+                                precio = float(x.precio)
+                                if price1 <= precio <= price2:
+                                    contador += 1
+                                    print(x.mostrar_producto())
+                            except ValueError:
+                                print(f"Error: El precio del producto '{x.nombre}' no es válido.")
+                                print("\nRango de precio de productos encontrado con exito!! \n")
+
+            elif gestion == 5:
+                print("Gestión de venta de restaurantes")
+                cedula = input("Ingrese su cedula")
+                cont = 0
+                cont1 = 0
+                for x in clientes:
+                    if x.cedula == cedula:
+                        cont+=1
+                        if x.tipo_entrada == "vip":
+                            cont1 +=1
+                            name = x.nombre
+                            cedu=x.cedula
+                            ed= x.edad
+                            entrad = x.tipo_entrada
+                            codticket = x.codigoticket
+                            asien = x.asientos
+                            print(name,cedu,ed,entrad,codticket,asien)
+                    else:
+                        cont = cont
+                        cont1 = cont1
+                if cont ==0:
+                    print("No se encontro el cliente")
+                elif cont1 ==0:
+                    print("Su ticket no es vip, y por ende no es posible acceder al restaurante")
+                else:
+                    print("╠══════════════════════════Bienvenido al restaurante para clientes vip══════════════════════════╣")
+                    precio = 0
+                    carrito = []
+                    total_restaurante_vip =0
+                    print (total_productos)
+                    while True:
+                        try:
+                            i = 1
+                            for x in total_productos:
+                                print(i)
+                                print(x.mostrar_producto())
+                                i += 1
+                            prod = int(input("Ingrese el numero del producto que desee comprar: "))
+                            quit = total_productos[prod-1]
+                            print(quit.mostrar_producto())
+                            carrito.append(quit)
+                            precio += int(quit.precio)
+                            total_productos.pop(prod-1)
+
+                            opcion = input("""Desea ordenar otro producto?
+                            1. Si
+                            2. No
+                            """)
+                            if opcion == "2":
+                                break
+                        except:
+                            print("Error")
+                    for x in carrito:
+                        print(x.mostrar_producto())
+                    compra = input("Desea proceder con la compra \n[1] » Si \[2] » No")
+                    if compra.isnumeric()==False:
+                        compra = input("Desea proceder con la compra \n[1] » Si \[2] » No")
+                    else: 
+                        compra = int(compra)
+                        if compra ==1:
+                            cedula = int(cedula)
+                            if es_numero_perfecto(cedula) == True:
+                                print("Su cedula es un numero perfecto, por ende obtiene un descuento de 15%")
+                                descuento = True
+                                monto_total = precio * 0.15
+                            else: 
+                                print("Su cedula no es un numero perfecto, por ende no hay descuento")
+                                monto_total = precio
+                                descuento = False
+                            print("Compra exitosa")
+                            print(precio)
+                            print(f"""Detalles Compra: 
+                            Subtotal: {precio}
+                            Descuento: {descuento}
+                            Total: {monto_total}
+                            """)
+                            total_restaurante_vip+=int(monto_total)
+                        else:
+                            break 
+            elif gestion ==6:
+                print("Indicadores de gestión")
+                estadistica = input("""Ingrese la gestión a la que desea acceder
+        [1] » ¿Cuál es el promedio de gasto de un cliente VIP en un partido ticket +restaurante?
+        [2] » Mostrar tabla con la asistencia a los partidos de mejor a peor, mostrando el  nombre del partido nombre de los equipos, estadio en donde se juega, boletos vendidos, personas que asistieron y la relación asistencia/venta
+        [3] » ¿Cuál fue el partido con mayor asistencia?                
+        [4] » ¿Cuál fue el partido con mayor boletos vendidos?
+        [5] » Top 3 productos más vendidos en el restaurante.
+        [6] » Top 3 de clientes (clientes que más compraron boletos) """)
+                if estadistica ==1:
+                    promedio_gasto_vip= (monto_tickets_vip + total_restaurante_vip)/2
+                    print(f"{promedio_gasto_vip}")
+                elif estadistica ==2:
+                    partidos.sort(key=lambda x: x.asistencia, reverse=True)
+                    for x in partidos:
+                        print(x.show_partido())
+                elif estadistica ==3:
+                    partidos.sort(key=lambda x: x.asistencia, reverse=True)
+                    print(partidos[0].show_partido())
+                elif estadistica ==4:
+                    partidos.sort(key=lambda x: x.boletos_vendidos, reverse=True)
+                    print(partidos[0].show_partido())
+                elif estadistica ==5: 
+                    total_productos.sort(key=lambda x: x.cantidad_vendida, reverse=True)
+                    for x in total_productos:
+                        print(x.mostrar_producto())
+                elif estadistica ==6:
+                    clientes.sort(key=lambda x: x.boletos_comprados, reverse=True)
+                    for x in clientes:
+                        print(x.mostrar_cliente()) 
+                else: 
+                    break
+            else: 
+                break 
 
 main()
