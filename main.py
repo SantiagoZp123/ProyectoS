@@ -1,85 +1,152 @@
+import requests
+import json
 from Equipos import Equipos
 from Estadios import Estadios
 from Partidos import Partidos
 from Cliente import Cliente
 
-import requests
-import json
+from Bebida import Bebida
+from Alcoholica import Alcoholica
+from NoAlcoholica import NoAlcoholica
+from Alimento import Alimento
+from Plate import Plate
+from Package import Package
 
-def crearEquipo(nombre, codigoFifa, grupo, equipos_objeto, equipos):
-    nuevo_equipo = Equipos(nombre, codigoFifa, grupo)
+def crearEquipo(nombre, codigoFifa, grupo, equipo_id, equipos_objeto, equipos):
+    """
+    Crea un nuevo equipo y lo añade tanto al objeto de equipos como a la lista de equipos.
+
+    Parameters:
+    nombre (str): Nombre del equipo.
+    codigoFifa (str): Código FIFA del equipo.
+    grupo (str): Grupo al que pertenece el equipo.
+    equipo_id (str): Identificador único del equipo.
+    equipos_objeto (list): Lista de objetos de tipo Equipos donde se almacenará el nuevo equipo.
+    equipos (list): Lista de equipos donde se mostrará el nuevo equipo.
+
+    Returns:
+    None
+    """
+    nuevo_equipo = Equipos(nombre, codigoFifa, grupo, equipo_id)
     equipos_objeto.append(nuevo_equipo)
-    equipos.append(nuevo_equipo)
+    equipos.append(nuevo_equipo.mostrar_equipo())
 
-def emparejar_equipos_partidos(equipos):
-    equipos1_2 = []
-    for i in equipos:
-        if getattr(i, 'partido') == 'partido':
-            equipos1_2.append(i.show_nombre_num())
-    return equipos1_2
+def crearEstadio(name, city, capacity, estadio_id, estadios_objeto, estadios):
+    """
+    Crea un nuevo estadio y lo añade tanto al objeto de estadios como a la lista de estadios.
 
-def crearPartido(equipo_local, equipo_visitante, fecha, estadio, equipos, partidos_objeto, partidos):
-    equipos1_2 = emparejar_equipos_partidos(equipos)
-    nuevo_partido = Partidos(equipo_local, equipo_visitante, fecha, estadio, fecha)
-    partidos_objeto.append(nuevo_partido)
-    partidos.append(nuevo_partido.mostrar_partido())
+    Parameters:
+    name (str): Nombre del estadio.
+    city (str): Ciudad donde se encuentra el estadio.
+    capacity (int): Capacidad del estadio.
+    estadio_id (str): Identificador único del estadio.
+    estadios_objeto (list): Lista de objetos de tipo Estadios donde se almacenará el nuevo estadio.
+    estadios (list): Lista de estadios donde se mostrará el nuevo estadio.
 
-def mostrarPartidos(partidos):
-    paises = []
-    for partido in partidos:
-        paises.append(partido.equipo_local)  # Corregido para usar equipo_local
-    paises = list(set(paises))
-    for i, pais in enumerate(paises):
-        print(f"{i+1}. {pais}")
-    option = input("Seleccione el pais que desea ver: ")
-
-    for partido in partidos:
-        if partido.equipo_local == paises[int(option)-1]:  # Corregido para usar equipo_local
-            print(partido.mostrar_partido())
-
-def crearEstadio(nombre, ubicacion, estadio, estadios_objeto):
-    nuevo_estadio = Estadios(nombre, ubicacion, estadio)
+    Returns:
+    None
+    """
+    nuevo_estadio = Estadios(name, city, capacity, estadio_id)
     estadios_objeto.append(nuevo_estadio)
+    estadios.append(nuevo_estadio.mostrar_estadio())
 
-def crear_mapa(filas,columnas):
+def buscarPartidosPorPais(partidos):
     '''
-    
-    Funcion que genera el mapa de los puestos Vip y General.
-    
+    Función que muestra los partidos según el país seleccionado.
+    Muestra una lista de países disponibles y permite al usuario seleccionar uno para mostrar los partidos correspondientes.
     '''
-    mapa=[]
-    for y in range(filas):
-        aux=[]
-        for x in range(columnas):
-            aux.append(False)
-        mapa.append(aux)
+    ciudades = set()
+    for partido in partidos:
+        ciudades.add(partido.estadio.city)
+
+    ciudades = list(ciudades)
+    print("Ciudades disponibles:")
+    for i, ciudad in enumerate(ciudades):
+        print(f"{i + 1} -- {ciudad}")
+
+    opcion = input("Ingrese el número de la ciudad que desea buscar: ")
+
+    if opcion.isnumeric() and 1 <= int(opcion) <= len(ciudades):
+        ciudad_seleccionada = ciudades[int(opcion) - 1]
+        print(f"Partidos en {ciudad_seleccionada}:")
+        for partido in partidos:
+            if partido.estadio.city == ciudad_seleccionada:
+                print(partido.show_partido())
+    else:
+        print("Opción inválida")
+
+def buscarPartidosEquipos(partidos):
+    '''
+    Función que muestra los partidos según el país seleccionado.
+    Muestra una lista de países disponibles y permite al usuario seleccionar uno para mostrar los partidos correspondientes.
+    '''
+    paises = set()
+    for partido in partidos:
+        paises.add(partido.equipo_local)
+        paises.add(partido.equipo_visitante)
+
+    paises = list(paises)
+    print("Países disponibles:")
+    for i, pais in enumerate(paises):
+        print(f"{i + 1} -- {pais}")
+
+    opcion = input("Ingrese el número del país que desea buscar: ")
+
+    if opcion.isnumeric() and 1 <= int(opcion) <= len(paises):
+        pais_seleccionado = paises[int(opcion) - 1]
+        print(f"Partidos de {pais_seleccionado}:")
+        for partido in partidos:
+            if partido.equipo_local == pais_seleccionado or partido.equipo_visitante == pais_seleccionado:
+                print(partido.show_partido())
+    else:
+        print("Opción inválida")
+
+def buscarPartidosPorFecha(partidos):
+    '''
+    Función que muestra los partidos según la fecha seleccionada.
+    Muestra una lista de fechas disponibles y permite al usuario seleccionar una para mostrar los partidos correspondientes.
+    '''
+    fechas = set()
+    for partido in partidos:
+        fechas.add(partido.fecha)
+
+    fechas = list(fechas)
+    print("Fechas disponibles:")
+    for i, fecha in enumerate(fechas):
+        print(f"{i + 1} -- {fecha}")
+
+    opcion = input("Ingrese el número de la fecha que desea buscar (en formato yyyy-mm-dd): ")
+
+    found = False
+    for partido in partidos:
+        if partido.fecha == opcion:
+            print(partido.show_partido())
+            found = True
+
+    if not found:
+        print(f"No se encontraron partidos en la fecha {opcion}.")
+
+def mapa(fila, columna):
+    """
+    Marca una posición específica en un mapa bidimensional.
+
+    Parameters:
+    fila (int): Número de fila.
+    columna (int): Número de columna.
+
+    Returns:
+    list: Mapa actualizado con la posición marcada como True.
+    """
+    fila = input("Seleccione la fila:")
+    columna = input("Seleccione la columna")
+
+    mapa[int(fila)-1][int(columna)-1] = True
     return mapa
 
 def codigoAleatorio(item):
     identificador = format(id(item), 'x')
     return identificador
 
-def numeroOndulado(num):
-    '''
-    
-    Funcion que revisa si la cedula es un numero ondulado, para aplicar el descuento.
-    
-    '''
-    num_str = str(num)
-    n = len(num_str)
-    for i in range(1, n):
-        if i%2 == 0 and num_str[i] >= num_str[i-1]:
-            return False
-        elif i%2 == 1 and num_str[i] <= num_str[i-1]:
-            return False
-    return True
-
-def mapa(fila,columna):
-    fila = input("Seleccione la fila:")
-    columna = input("Seleccione la columna")
-
-    mapa[int(fila)-1][int(columna)-1] = True
-    return mapa
 
 def es_numero_perfecto(var):
     '''
@@ -95,20 +162,41 @@ def es_numero_perfecto(var):
         return True
     else:
         return False
+    
+def numeroOndulado(num):
+    '''
+    
+    Funcion que revisa si la cedula es un numero ondulado, para aplicar el descuento.
+    
+    '''
+    num_str = str(num)
+    n = len(num_str)
+    for i in range(1, n):
+        if i%2 == 0 and num_str[i] >= num_str[i-1]:
+            return False
+        elif i%2 == 1 and num_str[i] <= num_str[i-1]:
+            return False
+    return True
 
 def main():
-    equipos_objeto = []
     equipos = []
-    estadios_objeto = []
+    equipos_objeto = []
     estadios = []
-    partidos_objeto = []
+    estadios_objeto = []
     partidos = []
     codigos =[]
-    producto =[]
-    clientes =[]
-    monto_tickets_vip =0
-    cedulas_vip=[]
-    
+    clientes = []
+    cedulas_vip =[]
+    codigos =[]
+    codigos_usados =[]
+
+    bebidas_alcholicas_objeto =[]
+    bebidas_noalcoholicas_objeto =[]
+    alimentos_plate_objeto =[]
+    alimentos_package_objeto =[]
+    total_productos =[]
+    monto_tickets_vip =[]
+
     requests_equipos = requests.get('https://raw.githubusercontent.com/Algoritmos-y-Programacion/api-proyecto/main/teams.json')
     contenido_equipos = requests_equipos.content
     info_equipos = open('equipos.json', 'wb')
@@ -121,6 +209,37 @@ def main():
     info_estadios.write(contenido_estadios)
     info_estadios.close()
 
+    archivo_equipos = open('equipos.json')
+    datos_equipos = json.load(archivo_equipos)
+    for i in range(len(datos_equipos)):
+        nombre = datos_equipos[i]["name"]
+        codigoFifa = datos_equipos[i]["code"]
+        grupo = datos_equipos[i]["group"]
+        equipo_id = datos_equipos[i]["id"]
+        crearEquipo(nombre, codigoFifa, grupo, equipo_id, equipos_objeto, equipos)
+    archivo_equipos.close()
+
+    try:
+        with open('estadios.json', 'r', encoding='utf-8') as archivo_estadios:
+            datos_estadios = json.load(archivo_estadios)
+    except FileNotFoundError:
+        print("El archivo 'estadios.json' no fue encontrado.")
+    except json.JSONDecodeError:
+        print("Error al decodificar el archivo JSON. Asegúrese de que el archivo contiene un JSON válido.")
+    except UnicodeDecodeError:
+        print("Error al decodificar el archivo. Asegúrese de que el archivo está codificado en UTF-8.")
+    except Exception as e:
+        print(f"Ocurrió un error inesperado: {e}")
+
+    if 'datos_estadios' in locals():
+        for estadio in datos_estadios:
+            name = estadio["name"]
+            city = estadio["city"]
+            capacity = estadio["capacity"]
+            estadio_id = estadio["id"]
+            crearEstadio(name, city, capacity, estadio_id, estadios_objeto, estadios)
+
+    # Cargar los partidos
     requests_partidos = requests.get('https://raw.githubusercontent.com/Algoritmos-y-Programacion/api-proyecto/main/matches.json')
     contenido_partidos = requests_partidos.content
     info_partidos = open('partidos.json', 'wb')
@@ -129,31 +248,27 @@ def main():
 
     archivo_partidos = open('partidos.json')
     datos_partidos = json.load(archivo_partidos)
-    for i in range(len(datos_partidos)):
-        equipo_local = datos_partidos[i]["home"]
-        equipo_visitante = datos_partidos[i]["away"]
-        fecha = datos_partidos[i]["date"]
-        estadio = datos_partidos[i]["stadium_id"]
-        crearPartido(equipo_local, equipo_visitante, fecha, estadio, equipos, partidos_objeto, partidos)
-    archivo_partidos.close()
-    
-    archivo_equipos = open('equipos.json')
-    datos_equipos = json.load(archivo_equipos)
-    for i in range(len(datos_equipos)):
-        nombre = datos_equipos[i]["name"]
-        codigoFifa = datos_equipos[i]["code"]
-        grupo = datos_equipos[i]["group"]
-        crearEquipo(nombre, codigoFifa, grupo, equipos_objeto, equipos)
-    archivo_equipos.close()
 
-    archivo_estadios = open('estadios.json')
-    datos_estadios = json.load(archivo_estadios)
-    for i in range(len(datos_estadios)):
-        nombre = datos_estadios[i]["name"]
-        ubicacion = datos_estadios[i]["city"]
-        estadio = datos_estadios[i]["id"]
-        crearEstadio(nombre, ubicacion, estadio, estadios_objeto, estadios)
-    archivo_estadios.close()
+    for partido in datos_partidos:
+        home_team_id = partido["home"]["id"]
+        away_team_id = partido["away"]["id"]
+        hora = partido["date"]
+        estadio_id = partido["stadium_id"]
+        
+
+        home_team = next((equipo for equipo in equipos_objeto if equipo.equipo_id == home_team_id), None)
+        away_team = next((equipo for equipo in equipos_objeto if equipo.equipo_id == away_team_id), None)
+        estadio = next((estadio for estadio in estadios_objeto if estadio.estadio_id == estadio_id), None)
+
+        if home_team and away_team and estadio:
+            nuevo_partido = Partidos(home_team, away_team, hora,estadio )
+            partidos.append(nuevo_partido)
+    
+    archivo_partidos.close()
+
+    #for partido in partidos:
+    #print(partido.show_partido())
+    
 
     print("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ Bienvenido a la Euro 2024 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓")
     while True: 
@@ -172,231 +287,25 @@ def main():
                 print("░░░░░░░░░░░░░░░░░░░░░ Bienvenido a la seccion de busqueda ░░░░░░░░░░░░░░░░░░░░░")
                 while True: 
                     busqueda = input("""Ingrese la opcion a la que desea acceder
-                    [1] » Buscar constructor por país
-                    [2] » Buscar pilotos por constructor
-                    [3] » Buscar las carreras por país del circuito
-                    [4] » Buscar las carreras que ocurran en un mes
-                    [5] » Finalizar Carrera
-                    [6] » Finalizar Temporada
-                    [7] » Regresar """)
+                    [1] » Buscar todos los partidos de un país
+                    [2] » Buscar todos los partidos que se jugarán en un estadio específico
+                    [3] » Buscar todos los partidos que se jugarán en una fecha determinada
+                    [4] » Finalizar """)
 
                     if busqueda.isnumeric()== False or int(busqueda)>8:
                         print ("Ingresa una opción válida: ")
                     else:
                         busqueda = int(busqueda)
                         if busqueda==1:
-                            print("Hola")
+                            buscarPartidosEquipos(partidos)
                         elif busqueda ==2:
-                            print("Hola")
+                            buscarPartidosPorPais(partidos)
                         elif busqueda ==3:
-                            print("Hola")
+                            buscarPartidosPorFecha(partidos)
                         elif busqueda ==4:
-                            print("Hola")
-                        elif busqueda ==5:
                             break
             elif gestion ==2:
-                print("░░░░░░░░░░░░░░░░░░░░░ Seccion de venta de entradas ░░░░░░░░░░░░░░░░░░░░░")
-                opcion = input("""Usted desea realizar una compra
-                [1] » Si 
-                [2] » No""")
-                if opcion.isnumeric() == False or int(opcion)>2:
-                    print("Por favor ingrese una opción válida")
-                else: 
-                    opcion = int(opcion)
-                    if opcion == 1:
-                        lista_generales = []
-                        lista_vip =[]
-                        for x in datos_estadios:
-                            nombre = x["name"]  
-                            for x2,y in x.items():
-                                if x2 == "capacity":
-                                    general =y[0]
-                                    vip = y[1]
-                                    lista_generales.append(general)
-                                    lista_vip.append(vip)
-                        nombre = input("Ingrese su nombre: ")
-                        while not nombre.isalpha():
-                            nombre = (input("Ingrese un nombre valido: "))
-                        cedula = input("Ingrese su cedula: ")
-                        while not cedula.isnumeric():
-                            cedula = input("Ingrese una cedula validad: ")
-                        
-                        edad = input("Ingrese su edad: ")
-                        while not edad.isnumeric():
-                            edad = input ("Introduzca una edad valida:")
-                            if int(edad) > 0 and int(edad) < 100:
-                                continue
-                            else: 
-                                edad = input("Ingrese una edad válida: ")
-                        """buscarCarreras(carreras_objeto)"""
-                        cantidad_entradas = input("Ingrese la cantidad de entradas a comprar: ")
-                        while not cantidad_entradas.isnumeric():
-                            cantidad_entradas = input("Ingrese una cantidad de entradas válida:")
-                        for x in carreras_objeto:
-                            print(x.mostrar_carrera())
-                        tipo_entrada = input("""Ingrese el tipo de entrada que desea adquirir: 
-[1] » General
-[2] » Vip """)
-                        if tipo_entrada == "1":
-                            asientos_c=[]
-                            precio_general = 150.00
-                            option = int(input("Ingrese el numero de la carrera que desea comprar: "))
-                            print("--------------------------------------------------------------------------------------------------------------")
-                            print(f"A continuación se muestra la lista de entradas disponible de la forma [Fila,Columna] --> {lista_vip[option]} ")
-                            print("--------------------------------------------------------------------------------------------------------------")
-                            i=lista_vip[option][0]
-                            j=lista_vip[option][1]
-                            """print(i)
-                            print(j)"""
-                            mapa = crear_mapa(i,j)
-                            print(f"                                 ╔ Mapa Carrera {option} ╗                                                   ")
-                            print(mapa)
-                            print("--------------------------------------------------------------------------------------------------------------")
-                            
-                            for i in range(int(cantidad_entradas)):    
-                                while True:
-                                    try:
-                                        mapa
-
-                                        fila = input("Seleccione la fila:")
-                                        while fila==False:
-                                            fila =input("Seleccione otro asiento, ya que el seleccionado no se encuentra disponible: ")
-                                        columna = input("Seleccione la columna")
-                                        while columna==False:
-                                            columna =input("Seleccione otro asiento, ya que el seleccionado no se encuentra disponible: ")
-                                        mapa[int(fila)-1][int(columna)-1] = True
-
-                                        print("\n Aviso: Los puestos ocupados contienen True, por favor selecciona los que no estan ocupados\n")
-                                        print(mapa)
-
-                                        asiento = (f"F{fila}C{columna} ")
-                                        asientos_c.append(asiento)
-                                        break
-                                    except:
-                                        print("33")
-                                        
-                            codigo_ticket = codigoAleatorio(nombre)
-                            iva =0.16
-                            monto = float(cantidad_entradas)*precio_general
-                            
-                            if numeroOndulado(cedula) == True:
-                                ("Su cedula es un numero ondulado, por ende obtiene un descuento en la compra de sus entradas")
-                                monto_descuento = monto*0.50
-                                monto_d = monto - monto_descuento
-                                monto_con_iva= monto_d * 0.16
-                                monto_total = float(monto_d) + float(monto_con_iva) 
-                            else:
-                                monto_con_iva = float(monto)*0.16
-                                monto_descuento = "No"
-                                print("Su cedula no es un numero ondulado, por ende no hay descuento")
-                                monto_total = float(monto) + float(monto_con_iva)
-                            print(f"""Detalles compra:
-                            Asientos: {asientos_c} 
-                            Código: {codigo_ticket}
-                            Subtotal: {monto}
-                            Descuento: {monto_descuento}
-                            Iva: {iva}
-                            Total: {monto_total}
-                            
-                            """)
-                            compra = input("Desea proceder a comprar la entrada \n[1] » Si \[2] » No")
-                            if compra.isnumeric()==False:
-                                compra = input("Desea proceder a comprar la entrada \n[1] » Si \[2] » No")
-                            else: 
-                                compra = int(compra)
-                                if compra ==1:
-                                    print("Compra exitosa")
-                                    codigos.append(codigo_ticket)
-                                    entrada = "general"
-                                    cliente = Cliente(nombre,cedula,edad,entrada, codigo_ticket,asientos_c)
-                                    clientes.append(cliente)
-                                    print(cliente.mostrar_cliente())
-                                else:
-                                    break 
-
-                        elif tipo_entrada == "2":
-                            asientos_c =[]
-                            entrada = "vip"
-                            precio_vip = 340.00
-                            #print(lista_vip)
-                            option = int(input("Ingrese la ronda de la carrera a comprar: "))
-                            print("--------------------------------------------------------------------------------------------------------------")
-                            print(f"A continuación se muestra la lista de entradas disponible de la forma [Fila,Columna] --> {lista_vip[option]} ")
-                            print("--------------------------------------------------------------------------------------------------------------")
-                            i=lista_vip[option][0]
-                            j=lista_vip[option][1]
-                            """print(i)
-                            print(j)"""
-                            mapa = crear_mapa(i,j)
-                            print(f"                                 ╔ Mapa Carrera {option} ╗                                                   ")
-                            print(mapa)
-                            print("--------------------------------------------------------------------------------------------------------------")
-                            
-                            for i in range(int(cantidad_entradas)):
-                                while True:
-                                    try:
-                                        mapa
-
-                                        fila = input("Seleccione la fila:")
-                                        while fila==False:
-                                            fila =input("Seleccione otro asiento, ya que el seleccionado no se encuentra disponible: ")
-                                        columna = input("Seleccione la columna")
-                                        while columna==False:
-                                            columna =input("Seleccione otro asiento, ya que el seleccionado no se encuentra disponible: ")
-                                        
-                                        mapa[int(fila)-1][int(columna)-1] = True
-
-                                        print("\n Aviso: Los puestos ocupados contienen True, por favor selecciona los que no estan ocupados\n")
-                                        print(mapa)
-
-                                        asiento = (f"F{fila}C{columna} ")
-                                        asientos_c.append(asiento)
-                                        break
-                                    except:
-                                        print("33")
-
-                            #montos_tickets_vip += monto_total_vip
-                            #while i in range(cantidad_entradas) lo itero la cantidad de veces que compra la entrada 
-                            codigo_ticket = codigoAleatorio(nombre)
-                            iva =0.16
-                            monto = float(cantidad_entradas)*precio_vip
-                           
-                            if numeroOndulado(cedula) == True:
-                                print("Su cedula es un numero ondulado, por ende obtiene un descuento en la compra de sus entradas")
-                                monto_descuento = monto *0.50
-                                monto_d = monto-monto_descuento
-                                monto_con_iva = float(monto_d)*0.16
-                                monto_total_vip = float(monto) + float(monto_con_iva)-monto_descuento
-                            else: 
-                                print("Su cedula no es un numero ondulado, por ende no hay descuento")
-                                monto_descuento = "No"
-                                monto_con_iva = float(monto)*0.16
-                                monto_total_vip = float(monto) + float(monto_con_iva)
-                            print(f"""Detalles compra:
-                            Asientos: {asientos_c} 
-                            Código: {codigo_ticket}
-                            Subtotal: {monto}
-                            Descuento: {monto_descuento}
-                            Iva: {iva}
-                            Total: {monto_total_vip}
-                            
-                            """)
-                            compra = input("Desea proceder a comprar la entrada \n[1] » Si \[2] » No")
-                            if compra.isnumeric()==False:
-                                compra = input("Desea proceder a comprar la entrada \n[1] » Si \[2] » No")
-                            else: 
-                                compra = int(compra)
-                                if compra ==1:
-                                    print("Compra exitosa")
-                                    codigos.append(codigo_ticket)
-                                    cedulas_vip.append(cedula)
-                                    cliente = Cliente(nombre,cedula,edad,entrada, codigo_ticket,asientos_c)
-                                    clientes.append(cliente)
-                                    print(cliente.mostrar_cliente())
-                                else:
-                                    break 
-                            with open("clientesvip.txt", "w") as f:
-                                f.write(nombre,cedula,edad,entrada,codigo_ticket,asientos_c)
+                
             elif opcion == 2:
                 print ("Gracias por su visita")
                 break
