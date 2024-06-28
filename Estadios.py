@@ -1,12 +1,15 @@
 class Estadios():
-    def __init__(self, equipo_local, equipo_visitante, fecha, estadio):
-        self.equipo_local = equipo_local
-        self.equipo_visitante = equipo_visitante
-        self.fecha = fecha
-        self.estadio = estadio
+    def __init__(self, name, city, capacity, estadio_id):
+        self.name = name
+        self.city = city
+        self.capacity = capacity
+        self.estadio_id = estadio_id
 
     def mostrar_estadio(self):
-        return self.nombre, self.ubicación, self.estadio
+        return self.name, self.city, self.capacity, self.estadio_id
     
     def __str__(self):
-        return (f"Nombre: {self.nombre}, Ubicación: {self.ubicación}, Estadio: {self.estadio}")
+        return (f" Nombre: {self.name}, Ciudad: {self.city}, Capacidad: {self.capacity}")
+    
+    def show_nombre_est(self):
+        return (f"Nombre: {self.name}, Ciudad: {self.city}, Capacidad: {self.capacity}, ID: {self.estadio_id}")

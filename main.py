@@ -5,12 +5,13 @@ from Estadios import Estadios
 from Partidos import Partidos
 from Cliente import Cliente
 
+from Alimento import Alimento 
 from Bebida import Bebida
 from Alcoholica import Alcoholica
 from NoAlcoholica import NoAlcoholica
-from Alimento import Alimento
 from Plate import Plate
 from Package import Package
+ 
 
 def crearEquipo(nombre, codigoFifa, grupo, equipo_id, equipos_objeto, equipos):
     """
@@ -126,6 +127,79 @@ def buscarPartidosPorFecha(partidos):
     if not found:
         print(f"No se encontraron partidos en la fecha {opcion}.")
 
+def crear_mapa(columnas):
+    '''
+    Genera un mapa de puestos Vip y General.
+    Divide el mapa en sublistas de 10 columnas cada una y coloca cada sublista una debajo de la otra.
+    '''
+    if columnas < 10:
+        columnas = 10
+
+    mapa = []
+    fila = []
+
+    for i in range(columnas):
+        fila.append(False)
+        if len(fila) == 10:
+            mapa.append(fila)
+            fila = []
+
+    if fila:  # Si hay columnas restantes que no completan una fila de 10, se agregan al mapa
+        mapa.append(fila)
+
+    return mapa
+
+def codigoAleatorio(item):
+    """
+    Genera un identificador aleatorio en formato hexadecimal basado en el ID del objeto.
+
+    Parameters:
+    item (object): Objeto del cual se generará el identificador.
+
+    Returns:
+    str: Identificador aleatorio en formato hexadecimal.
+    """
+    identificador = format(id(item), 'x')
+    return identificador
+
+def esNumeroVampiro(num):
+    '''
+    Determina si un número es un número vampiro.
+    Un número vampiro es un número que puede ser formado por la multiplicación de dos números de la mitad de sus dígitos,
+    manteniendo el mismo orden de los dígitos originales.
+
+    Parameters:
+    num (int): Número a evaluar.
+
+    Returns:
+    bool: True si el número es vampiro, False en caso contrario.
+    '''
+    num_str = str(num)
+    n = len(num_str)
+    
+    # Un número vampiro debe tener un número par de dígitos
+    if n % 2 != 0:
+        return False
+    
+    # Generar todos los pares posibles de "colmillos"
+    mitad = n // 2
+    
+    # Crear una lista para almacenar los colmillos
+    colmillos = []
+    
+    # Crear los colmillos manualmente
+    for i in range(1, 10**mitad):
+        for j in range(1, 10**mitad):
+            if sorted(str(i) + str(j)) == sorted(num_str) and i * j == num:
+                colmillos.append((i, j))
+    
+    # Verificar si algún par de colmillos cumple la condición
+    for colmillo1, colmillo2 in colmillos:
+        if colmillo1 * colmillo2 == num:
+            return True
+    
+    return False
+
 def mapa(fila, columna):
     """
     Marca una posición específica en un mapa bidimensional.
@@ -143,11 +217,6 @@ def mapa(fila, columna):
     mapa[int(fila)-1][int(columna)-1] = True
     return mapa
 
-def codigoAleatorio(item):
-    identificador = format(id(item), 'x')
-    return identificador
-
-
 def es_numero_perfecto(var):
     '''
     
@@ -162,21 +231,6 @@ def es_numero_perfecto(var):
         return True
     else:
         return False
-    
-def numeroOndulado(num):
-    '''
-    
-    Funcion que revisa si la cedula es un numero ondulado, para aplicar el descuento.
-    
-    '''
-    num_str = str(num)
-    n = len(num_str)
-    for i in range(1, n):
-        if i%2 == 0 and num_str[i] >= num_str[i-1]:
-            return False
-        elif i%2 == 1 and num_str[i] <= num_str[i-1]:
-            return False
-    return True
 
 def main():
     equipos = []
@@ -270,7 +324,7 @@ def main():
     #print(partido.show_partido())
     
 
-    print("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ Bienvenido a la Euro 2024 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓")
+    print("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ Bienvenido a la Euro 2024 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓")
     while True: 
         gestion = input("""Ingrese la gestión a la que desea acceder
         [1] » Gestion de partidos y estadios
