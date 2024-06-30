@@ -395,7 +395,7 @@ def main():
                                 continue
                             else: 
                                 edad = input("Ingrese una edad válida: ")
-                        """buscarCarreras(equiposs_objeto)"""
+                        """buscarEstadios(partidoss_objeto)"""
                         cantidad_entradas = input("Ingrese la cantidad de entradas a comprar: ")
                         while not cantidad_entradas.isdigit():
                             cantidad_entradas = input("Ingrese una cantidad de entradas válida: ")
@@ -874,21 +874,21 @@ def main():
                     promedio_gasto_vip= (monto_tickets_vip + total_restaurante_vip)/2
                     print(f"{promedio_gasto_vip}")
                 elif estadistica ==2:
-                    partidos.sort(key=lambda x: x.asistencia, reverse=True)
+                    partidos.sort(key=lambda x: x.codigos_usados, reverse=True)
                     for x in partidos:
                         print(x.show_partido())
                 elif estadistica ==3:
-                    partidos.sort(key=lambda x: x.asistencia, reverse=True)
+                    partidos.sort(key=lambda x: x.codigos_usados, reverse=True)
                     print(partidos[0].show_partido())
                 elif estadistica ==4:
-                    partidos.sort(key=lambda x: x.boletos_vendidos, reverse=True)
+                    partidos.sort(key=lambda x: x.precio_total, reverse=True)
                     print(partidos[0].show_partido())
                 elif estadistica ==5: 
-                    total_productos.sort(key=lambda x: x.cantidad_vendida, reverse=True)
+                    total_productos.sort(key=lambda x: x.cantidad, reverse=True)
                     for x in total_productos:
                         print(x.mostrar_producto())
                 elif estadistica ==6:
-                    clientes.sort(key=lambda x: x.boletos_comprados, reverse=True)
+                    clientes.sort(key=lambda x: x.tipo_entrada, reverse=True)
                     for x in clientes:
                         print(x.mostrar_cliente()) 
                 else: 
