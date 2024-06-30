@@ -414,11 +414,12 @@ def main():
                             print(f"A continuación se muestra la lista de entradas disponible de la forma [Fila,Columna] --> {lista_generales[option]} ")
                             print("--------------------------------------------------------------------------------------------------------------")
                             i = lista_generales[option]
+                            mapa = crear_mapa(i)
                             print(f"                                 ╔ Mapa Carrera {option} ╗                                                   ")
                             print(mapa)
                             print("--------------------------------------------------------------------------------------------------------------")
 
-                            for _ in range(cantidad_entradas):    
+                            for i in range(cantidad_entradas):    
                                 while True:
                                     try:
                                         fila = int(input("Seleccione la fila: ")) - 1
