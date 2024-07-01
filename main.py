@@ -273,7 +273,9 @@ def seleccionar_asiento(mapa, cantidad_entradas):
 
         print("\nAviso: Los puestos ocupados contienen True, por favor selecciona los que no están ocupados\n")
         print(mapa)
+
     return asientos_seleccionados
+
 
 def main():
     equipos = []
@@ -431,16 +433,12 @@ def main():
                         while not nombre.isalpha():
                             nombre = (input("Ingrese un nombre valido: "))
                         cedula = input("Ingrese su cedula: ")
-                        while not cedula.isnumeric():
-                            cedula = input("Ingrese una cedula validad: ")
-                        
+                        while not cedula.isnumeric() or len(cedula) >= 9:
+                            cedula = input("Ingrese una cedula válida (menos de 9 dígitos): ")
+                                                
                         edad = input("Ingrese su edad: ")
-                        while not edad.isnumeric():
-                            edad = input ("Introduzca una edad valida:")
-                            if int(edad) > 0 and int(edad) < 100:
-                                continue
-                            else: 
-                                edad = input("Ingrese una edad válida: ")
+                        while not edad.isnumeric() or not (1 <= int(edad) <= 100):
+                            edad = input("Ingrese una edad válida (entre 1 y 100): ")
                         """buscarEstadios(partidoss_objeto)"""
                         cantidad_entradas = input("Ingrese la cantidad de entradas a comprar: ")
                         while not cantidad_entradas.isdigit():
@@ -461,7 +459,7 @@ def main():
                             print("--------------------------------------------------------------------------------------------------------------")
                             i = lista_generales[option]
                             mapa = crear_mapa(i)
-                            print(f"                                 ╔ Mapa Carrera {option} ╗                                                   ")
+                            print(f"                                 ╔ Mapa Estadio {option} ╗                                                   ")
                             print(mapa)
                             print("--------------------------------------------------------------------------------------------------------------")
 
@@ -519,7 +517,7 @@ def main():
                             print("--------------------------------------------------------------------------------------------------------------")
                             i = lista_vip[option]
                             mapa = crear_mapa(i)
-                            print(f"                                 ╔ Mapa Carrera {option} ╗                                                   ")
+                            print(f"                                 ╔ Mapa Estadio {option} ╗                                                   ")
                             print(mapa)
                             print("--------------------------------------------------------------------------------------------------------------")
 
@@ -829,7 +827,9 @@ def main():
                             1. Si
                             2. No
                             """)
-                            if opcion == "2":
+                            if option =="1":
+                                continue
+                            elif opcion == "2":
                                 break
                         except:
                             print("Error")
