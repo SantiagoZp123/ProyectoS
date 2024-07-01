@@ -1,9 +1,11 @@
 import requests
 import json
+import os
 from Equipos import Equipos
 from Estadios import Estadios
 from Partidos import Partidos
 from Cliente import Cliente
+
 
 from Alimento import Alimento 
 from Bebida import Bebida
@@ -149,6 +151,7 @@ def crear_mapa(columnas):
 
     return mapa
 
+
 def codigoAleatorio(item):
     """
     Genera un identificador aleatorio en formato hexadecimal basado en el ID del objeto.
@@ -232,6 +235,46 @@ def es_numero_perfecto(var):
     else:
         return False
 
+def guardar_estado_asientos(filename, estado_asientos):
+    with open(filename, 'w') as file:
+        json.dump(estado_asientos, file)
+
+# Función para cargar el estado de los asientos desde un archivo
+def cargar_estado_asientos(filename):
+    try:
+        with open(filename, 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return []
+
+def seleccionar_asiento(mapa, cantidad_entradas):
+    asientos_seleccionados = []
+    for i in range(cantidad_entradas):
+        while True:
+            try:
+                fila = int(input("Seleccione la fila: ")) - 1
+                columna = int(input("Seleccione la columna: ")) - 1
+
+                if fila < 0 or fila >= len(mapa) or columna < 0 or columna >= len(mapa[0]):
+                    print("Fila o columna fuera de rango. Intente de nuevo.")
+                    continue
+
+                if mapa[fila][columna]:
+                    print("Asiento ya ocupado. Seleccione otro asiento.")
+                else:
+                    mapa[fila][columna] = True
+                    asiento = f"F{fila + 1}C{columna + 1}"
+                    asientos_seleccionados.append(asiento)
+                    break
+            except ValueError:
+                print("Entrada no válida. Por favor ingrese números válidos.")
+            except Exception as e:
+                print(f"Ocurrió un error: {e}")
+
+        print("\nAviso: Los puestos ocupados contienen True, por favor selecciona los que no están ocupados\n")
+        print(mapa)
+    return asientos_seleccionados
+
 def main():
     equipos = []
     equipos_objeto = []
@@ -243,6 +286,9 @@ def main():
     cedulas_vip =[]
     codigos =[]
     codigos_usados =[]
+    asientos_general = cargar_estado_asientos('asientos_general.json')
+    asientos_vip = cargar_estado_asientos('asientos_vip.json')
+    
 
     bebidas_alcholicas_objeto =[]
     bebidas_noalcoholicas_objeto =[]
@@ -407,11 +453,11 @@ def main():
 [1] » General           
 [2] » Vip """)
                         if tipo_entrada == "1":
-                            asientos_c = []
-                            precio_general = 150.00
-                            option = int(input("Ingrese el número del partido que desea comprar: ")) -1
+                            asientos_general = []
+                            precio_general = 35.00
+                            option = int(input("Ingrese el número del partido que desea comprar: ")) - 1
                             print("--------------------------------------------------------------------------------------------------------------")
-                            print(f"A continuación se muestra la lista de entradas disponible de la forma [Fila,Columna] --> {lista_generales[option]} ")
+                            print(f"A continuación se muestra la lista de entradas disponible de la forma [Fila,Columna] --> {lista_generales[option]}")
                             print("--------------------------------------------------------------------------------------------------------------")
                             i = lista_generales[option]
                             mapa = crear_mapa(i)
@@ -419,41 +465,18 @@ def main():
                             print(mapa)
                             print("--------------------------------------------------------------------------------------------------------------")
 
-                            for i in range(cantidad_entradas):    
-                                while True:
-                                    try:
-                                        fila = int(input("Seleccione la fila: ")) - 1
-                                        columna = int(input("Seleccione la columna: ")) - 1
-                                        
-                                        if fila < 0 or fila >= len(mapa) or columna < 0 or columna >= len(mapa[0]):
-                                            print("Fila o columna fuera de rango. Intente de nuevo.")
-                                            continue
-
-                                        if mapa[fila][columna]:
-                                            print("Asiento ya ocupado. Seleccione otro asiento.")
-                                        else:
-                                            mapa[fila][columna] = True
-                                            asiento = f"F{fila+1}C{columna+1}"
-                                            asientos_c.append(asiento)
-                                            break
-                                    except ValueError:
-                                        print("Entrada no válida. Por favor ingrese números válidos.")
-                                    except Exception as e:
-                                        print(f"Ocurrió un error: {e}")
-                                        
-                                print("\nAviso: Los puestos ocupados contienen True, por favor selecciona los que no están ocupados\n")
-                                print(mapa)
+                            asientos_general = seleccionar_asiento(mapa, cantidad_entradas)
 
                             codigo_ticket = codigoAleatorio(nombre)
                             iva = 0.16
-                            monto = float(cantidad_entradas) * precio_general
-                            
+                            monto = float(len(asientos_general)) * precio_general
+
                             if esNumeroVampiro(cedula):
                                 print("Su cédula es un número ondulado, por ende obtiene un descuento en la compra de sus entradas")
                                 monto_descuento = monto * 0.50
                                 monto_d = monto - monto_descuento
                                 monto_con_iva = monto_d * iva
-                                monto_total = monto_d + monto_con_iva 
+                                monto_total = monto_d + monto_con_iva
                             else:
                                 monto_con_iva = monto * iva
                                 monto_descuento = "No"
@@ -461,34 +484,36 @@ def main():
                                 monto_total = monto + monto_con_iva
 
                             print(f"""Detalles compra:
-                            Asientos: {asientos_c} 
-                            Código: {codigo_ticket}
-                            Subtotal: {monto}
-                            Descuento: {monto_descuento}
-                            Iva: {monto_con_iva}
-                            Total: {monto_total}
-                            """)
+                        Asientos: {asientos_general}
+                        Código: {codigo_ticket}
+                        Subtotal: {monto}
+                        Descuento: {monto_descuento}
+                        Iva: {monto_con_iva}
+                        Total: {monto_total}
+                        """)
 
                             compra = input("¿Desea proceder a comprar la entrada?\n[1] » Sí\n[2] » No\n")
-                            while not compra.isnumeric():
+                            while compra not in ['1', '2']:
                                 compra = input("Entrada no válida. ¿Desea proceder a comprar la entrada?\n[1] » Sí\n[2] » No\n")
-                            
+
                             compra = int(compra)
                             if compra == 1:
                                 print("Compra exitosa")
                                 codigos.append(codigo_ticket)
                                 entrada = "general"
-                                cliente = Cliente(nombre, cedula, edad, entrada, codigo_ticket, asientos_c)
+                                cliente = Cliente(nombre, cedula, edad, entrada, codigo_ticket, asientos_general)
                                 clientes.append(cliente)
                                 print(cliente.mostrar_cliente())
+                                # Guardar el estado de los asientos generales
+                                guardar_estado_asientos('asientos_general.json', asientos_general)
                             else:
-                                print("Compra cancelada") 
+                                print("Compra cancelada")
 
                         elif tipo_entrada == "2":
-                            asientos_c = []
+                            asientos_vip = []
                             entrada = "vip"
-                            precio_vip = 340.00
-                            option = int(input("Ingrese el número del partido que desea comprar: ")) -1
+                            precio_vip = 75.00
+                            option = int(input("Ingrese el número del partido que desea comprar: ")) - 1
                             print("--------------------------------------------------------------------------------------------------------------")
                             print(f"A continuación se muestra la lista de entradas disponible de la forma [Fila,Columna] --> {lista_vip[option]}")
                             print("--------------------------------------------------------------------------------------------------------------")
@@ -498,78 +523,52 @@ def main():
                             print(mapa)
                             print("--------------------------------------------------------------------------------------------------------------")
 
-                            for i in range(cantidad_entradas):
-                                while True:
-                                    try:
-                                        fila = int(input("Seleccione la fila: ")) - 1
-                                        columna = int(input("Seleccione la columna: ")) - 1
-
-                                        if fila < 0 or columna < 0 or fila >= len(mapa) or columna >= len(mapa[0]):
-                                            print("La fila o columna seleccionada no es válida. Intente nuevamente.")
-                                            continue
-
-                                        if mapa[fila][columna]:
-                                            print("El asiento seleccionado ya está ocupado. Por favor seleccione otro asiento.")
-                                            continue
-
-                                        mapa[fila][columna] = True
-                                        print("\n Aviso: Los puestos ocupados contienen True, por favor selecciona los que no están ocupados\n")
-                                        print(mapa)
-
-                                        asiento = f"F{fila+1}C{columna+1}"
-                                        asientos_c.append(asiento)
-                                        break
-
-                                    except ValueError:
-                                        print("Entrada no válida. Por favor, ingrese un número para la fila y la columna.")
-                                    except Exception as e:
-                                        print(f"Ocurrió un error: {e}")
+                            asientos_vip = seleccionar_asiento(mapa, cantidad_entradas)
 
                             codigo_ticket = codigoAleatorio(nombre)
                             iva = 0.16
-                            monto = float(cantidad_entradas) * precio_vip
-                            
+                            monto = float(len(asientos_vip)) * precio_vip
 
                             if esNumeroVampiro(cedula):
-                                print("Su cédula es un número ondulado, por ende obtiene un descuento en la compra de sus entradas")
+                                print("Su cédula es un número vampiro, por ende obtiene un descuento en la compra de sus entradas")
                                 monto_descuento = monto * 0.50
                                 monto_d = monto - monto_descuento
                                 monto_con_iva = monto_d * iva
                                 monto_total_vip = monto_d + monto_con_iva
                             else:
-                                print("Su cédula no es un número ondulado, por ende no hay descuento")
+                                print("Su cédula no es un número vampiro, por ende no hay descuento")
                                 monto_descuento = 0
                                 monto_con_iva = monto * iva
                                 monto_total_vip = monto + monto_con_iva
-                                montos_ticket_vip =+ monto_total_vip
 
                             print(f"""Detalles compra:
-                            Asientos: {asientos_c} 
-                            Código: {codigo_ticket}
-                            Subtotal: {monto}
-                            Descuento: {monto_descuento}
-                            Iva: {monto_con_iva}
-                            Total: {monto_total_vip}
-                            """)
+                        Asientos: {asientos_vip}
+                        Código: {codigo_ticket}
+                        Subtotal: {monto}
+                        Descuento: {monto_descuento}
+                        Iva: {monto_con_iva}
+                        Total: {monto_total_vip}
+                        """)
 
-                            compra = input("Desea proceder a comprar la entrada \n[1] » Si \n[2] » No")
-                            while not compra.isdigit() or int(compra) not in [1, 2]:
-                                compra = input("Desea proceder a comprar la entrada \n[1] » Si \n[2] » No")
-                            
+                            compra = input("Desea proceder a comprar la entrada \n[1] » Si \n[2] » No\n")
+                            while compra not in ['1', '2']:
+                                compra = input("Entrada no válida. Desea proceder a comprar la entrada \n[1] » Si \n[2] » No\n")
+
                             compra = int(compra)
                             if compra == 1:
                                 print("Compra exitosa")
                                 codigos.append(codigo_ticket)
                                 cedulas_vip.append(cedula)
-                                cliente = Cliente(nombre, cedula, edad, entrada, codigo_ticket, asientos_c)
+                                cliente = Cliente(nombre, cedula, edad, entrada, codigo_ticket, asientos_vip)
                                 clientes.append(cliente)
                                 print(cliente.mostrar_cliente())
+                                # Guardar el estado de los asientos VIP
+                                guardar_estado_asientos('asientos_vip.json', asientos_vip)
                             else:
                                 print("Compra cancelada")
-                        
                             #with open("clientesvip.txt", "w") as f:
                                 #f.write(nombre,cedula,edad,entrada,codigo_ticket,asientos_c)
-            elif opcion == 3:
+            elif gestion == 3:
                 print("Gestión de asitencia a partidos")
                 aux = 0
                 aux1 = 0
@@ -702,12 +701,12 @@ def main():
                 option = input("""Desea buscar productos por: 
 [1] » Nombre 
 [2] » Tipo
-[1] » Rango de Precio """)
+[3] » Rango de Precio """)
                 if option.isnumeric() == False:
                     option = input(""""Desea buscar productos por:
 [1] » Nombre 
 [2] » Tipo
-[1] » Rango de Precio""")
+[3] » Rango de Precio""")
                 else:
                     option = int(option)
                     if option ==1:
